@@ -7,17 +7,29 @@ import { ClientToServerEvents, ServerToClientEvents } from '../types/game';
 const app = express();
 const server = http.createServer(app);
 
-// Configure CORS - allow frontend URL in production or all origins in development
-const allowedOrigins = process.env.FRONTEND_URL
-  ? [process.env.FRONTEND_URL, 'http://localhost:3000']
-  : '*';
-
-console.log('[CORS] FRONTEND_URL:', process.env.FRONTEND_URL);
-console.log('[CORS] Allowed origins:', allowedOrigins);
-
+// Configure CORS - allow Vercel preview URLs and production URL
 const io = new Server<ClientToServerEvents, ServerToClientEvents>(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, curl, etc.)
+      if (!origin) return callback(null, true);
+
+      // Allow localhost for development
+      if (origin.includes('localhost')) return callback(null, true);
+
+      // Allow all Vercel preview and production URLs for this project
+      if (origin.includes('carte-un-po-strane') && origin.includes('vercel.app')) {
+        return callback(null, true);
+      }
+
+      // Allow explicit FRONTEND_URL if set
+      if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) {
+        return callback(null, true);
+      }
+
+      console.log('[CORS] Blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    },
     methods: ['GET', 'POST'],
     credentials: true,
   },
