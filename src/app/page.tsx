@@ -400,7 +400,6 @@ export default function Home() {
                             key={cardIndex}
                             type="white"
                             text={card.text}
-                            onClick={isZar ? () => handlePickWinner(submission.playerId) : undefined}
                           />
                         ))}
                       </div>
