@@ -12,10 +12,14 @@ const allowedOrigins = process.env.FRONTEND_URL
   ? [process.env.FRONTEND_URL, 'http://localhost:3000']
   : '*';
 
+console.log('[CORS] FRONTEND_URL:', process.env.FRONTEND_URL);
+console.log('[CORS] Allowed origins:', allowedOrigins);
+
 const io = new Server<ClientToServerEvents, ServerToClientEvents>(server, {
   cors: {
     origin: allowedOrigins,
     methods: ['GET', 'POST'],
+    credentials: true,
   },
 });
 
