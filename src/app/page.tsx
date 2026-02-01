@@ -521,6 +521,7 @@ export default function Home() {
             <h1 className="text-5xl font-black mb-2">CARTE CONTRO</h1>
             <h2 className="text-3xl font-black text-purple-500">L&apos;UMANITA&apos;</h2>
             <p className="text-zinc-400 mt-2">Dario Moccia Edition</p>
+            <p className="text-zinc-600 text-xs mt-1">by Robs e Gisa</p>
           </div>
 
           {!isConnected && (

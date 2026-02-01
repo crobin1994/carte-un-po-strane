@@ -89,6 +89,9 @@ export const blackCards: BlackCard[] = [
   { id: 'b72', text: "Nei file Epstein: _____ e _____.", pick: 2 },
   { id: 'b73', text: "_____ se non metti la propic.", pick: 1 },
   { id: 'b74', text: "Questo gruppo non è Tinder, è _____.", pick: 1 },
+  { id: 'b75', text: "Nuovo sottogruppo _____.", pick: 1 },
+  { id: 'b76', text: "Bonsen ha dichiarato guerra a _____.", pick: 1 },
+  { id: 'b77', text: "Se hai bisogno di aiuto, non _____.", pick: 1 },
 ];
 
 // Carte Bianche - Risposte
@@ -411,6 +414,40 @@ export const whiteCards: WhiteCard[] = [
   { id: 'w283', text: "Bannare" },
   { id: 'w284', text: "Mutare" },
   { id: 'w285', text: "Postare" },
+
+  // From docx (1) - More Lore Mosca
+  { id: 'w286', text: "Ha fondato un nuovo partito" },
+  { id: 'w287', text: "Ha scritto un libro" },
+  { id: 'w288', text: "Una gif di Manuelz" },
+  { id: 'w289', text: "Maccio Capatonda" },
+  { id: 'w290', text: "Aurapuzzing" },
+  { id: 'w291', text: "Pedofilia" },
+  { id: 'w292', text: "Canibalismo" },
+  { id: 'w293', text: "L'ICE" },
+  { id: 'w294', text: "Dario mi puoi sospendere?" },
+  { id: 'w295', text: "10.000 pippoli" },
+  { id: 'w296', text: "Chiama Volpescu" },
+  { id: 'w297', text: "Entrare su Discord" },
+  { id: 'w298', text: "Professional time" },
+  { id: 'w299', text: "Spyro" },
+  { id: 'w300', text: "Crash Bandicoot" },
+  { id: 'w301', text: "Spongebob" },
+  { id: 'w302', text: "Agosto" },
+  { id: 'w303', text: "Fare l'elemosina" },
+  { id: 'w304', text: "Cambiare idea ma negarlo" },
+  { id: 'w305', text: "Spiegare una cosa semplice per venti minuti" },
+  { id: 'w306', text: "Prendersela con qualcuno che non c'è" },
+  { id: 'w307', text: "Leggere la chat e pentirsene" },
+  { id: 'w308', text: "Sospirare prima di rispondere" },
+  { id: 'w309', text: "Interrompersi per chiarire" },
+  { id: 'w310', text: "Rispondere a una domanda che nessuno ha fatto" },
+  { id: 'w311', text: "Essere incel" },
+  { id: 'w312', text: "Mandare un messaggio vocale" },
+  { id: 'w313', text: "Chiamare la mamma" },
+  { id: 'w314', text: "Chiamare la polizia" },
+  { id: 'w315', text: "Fessa" },
+  { id: 'w316', text: "Cazzo" },
+  { id: 'w317', text: "Ha slyderato in privato" },
 ];
 
 // Function to shuffle an array (Fisher-Yates)
