@@ -73,6 +73,10 @@ export const blackCards: BlackCard[] = [
   { id: 'b58', text: "Il motivo per cui la live è in ritardo è _____.", pick: 1 },
   { id: 'b59', text: "Durante la maratona notturna, Dario ha confessato _____.", pick: 1 },
   { id: 'b60', text: "Il prossimo merchandise di Dario sarà _____.", pick: 1 },
+  { id: 'b61', text: "La prossima Trilobox arc sarà su _____.", pick: 1 },
+  { id: 'b62', text: "La prossima crush di Fadaniele sarà _____.", pick: 1 },
+  { id: 'b63', text: "Tarallo è stato bannato per aver detto _____.", pick: 1 },
+  { id: 'b63', text: "Ho cacato nel _____.", pick: 1 },
 ];
 
 // Carte Bianche - Risposte
