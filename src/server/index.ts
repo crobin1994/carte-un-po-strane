@@ -44,6 +44,36 @@ app.get('/health', (req, res) => {
 const socketRooms = new Map<string, string>();
 const socketPlayerIds = new Map<string, string>();
 
+// Grace period before deleting empty rooms (5 minutes)
+const ROOM_GRACE_PERIOD_MS = 5 * 60 * 1000;
+const roomDeletionTimers = new Map<string, NodeJS.Timeout>();
+
+function scheduleRoomDeletion(roomCode: string) {
+  // Clear any existing timer
+  cancelRoomDeletion(roomCode);
+
+  const timer = setTimeout(() => {
+    const game = getGame(roomCode);
+    if (game && game.state.players.length === 0) {
+      deleteGame(roomCode);
+      console.log(`[Game] Room ${roomCode} deleted after grace period`);
+    }
+    roomDeletionTimers.delete(roomCode);
+  }, ROOM_GRACE_PERIOD_MS);
+
+  roomDeletionTimers.set(roomCode, timer);
+  console.log(`[Game] Room ${roomCode} scheduled for deletion in 5 minutes`);
+}
+
+function cancelRoomDeletion(roomCode: string) {
+  const timer = roomDeletionTimers.get(roomCode);
+  if (timer) {
+    clearTimeout(timer);
+    roomDeletionTimers.delete(roomCode);
+    console.log(`[Game] Room ${roomCode} deletion cancelled`);
+  }
+}
+
 io.on('connection', (socket: Socket<ClientToServerEvents, ServerToClientEvents>) => {
   console.log(`[Socket] User connected: ${socket.id}`);
 
@@ -80,8 +110,14 @@ io.on('connection', (socket: Socket<ClientToServerEvents, ServerToClientEvents>)
       return;
     }
 
+    // Cancel any pending deletion if room was empty
+    cancelRoomDeletion(roomCode);
+
+    // If room is empty, this player becomes the host
+    const isNewHost = game.state.players.length === 0;
+
     const playerId = socket.id;
-    const player = game.addPlayer(playerId, playerName);
+    const player = game.addPlayer(playerId, playerName, isNewHost);
     if (!player) {
       socket.emit('error', 'Impossibile unirsi (nome già in uso o stanza piena)');
       return;
@@ -91,7 +127,7 @@ io.on('connection', (socket: Socket<ClientToServerEvents, ServerToClientEvents>)
     socketRooms.set(socket.id, roomCode);
     socketPlayerIds.set(socket.id, playerId);
 
-    console.log(`[Game] ${playerName} joined room ${roomCode}`);
+    console.log(`[Game] ${playerName} joined room ${roomCode}${isNewHost ? ' (new host)' : ''}`);
 
     // Notify the new player
     socket.emit('room-joined', playerId, game.getPublicState(playerId));
@@ -270,10 +306,9 @@ io.on('connection', (socket: Socket<ClientToServerEvents, ServerToClientEvents>)
         game.removePlayer(playerId);
         socket.to(roomCode).emit('player-left', playerId);
 
-        // If no players left, delete the game
+        // If no players left, schedule deletion with grace period
         if (game.state.players.length === 0) {
-          deleteGame(roomCode);
-          console.log(`[Game] Room ${roomCode} deleted (no players)`);
+          scheduleRoomDeletion(roomCode);
         }
       }
 
