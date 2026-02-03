@@ -102,6 +102,7 @@ export default function GamePage() {
     submitCards,
     pickWinner,
     nextRound,
+    leaveRoom,
   } = useSocket();
 
   const [selectedCards, setSelectedCards] = useState<string[]>([]);
@@ -119,7 +120,10 @@ export default function GamePage() {
       <div className="min-h-screen bg-zinc-950 text-white flex flex-col items-center justify-center p-4">
         <p className="text-zinc-400 mb-4">Nessuna partita in corso</p>
         <button
-          onClick={() => router.push('/')}
+          onClick={() => {
+            leaveRoom();
+            router.push('/');
+          }}
           className="px-6 py-2 bg-purple-600 hover:bg-purple-700 rounded font-bold"
         >
           Torna alla home
@@ -172,7 +176,10 @@ export default function GamePage() {
           </div>
 
           <button
-            onClick={() => router.push('/')}
+            onClick={() => {
+              leaveRoom();
+              router.push('/');
+            }}
             className="w-full py-4 bg-purple-600 hover:bg-purple-700 rounded-lg font-black text-xl"
           >
             NUOVA PARTITA
