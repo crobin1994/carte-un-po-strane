@@ -43,6 +43,15 @@ app.get('/health', (req, res) => {
 // Track which room each socket is in
 const socketRooms = new Map<string, string>();
 const socketPlayerIds = new Map<string, string>();
+// Reverse mapping: playerId -> current socket.id (for sending personalized messages)
+const playerToSocket = new Map<string, string>();
+
+// Helper to get a player's current socket
+function getPlayerSocket(playerId: string): Socket<ClientToServerEvents, ServerToClientEvents> | undefined {
+  const socketId = playerToSocket.get(playerId);
+  if (!socketId) return undefined;
+  return io.sockets.sockets.get(socketId) as Socket<ClientToServerEvents, ServerToClientEvents> | undefined;
+}
 
 // Grace period before deleting empty rooms (5 minutes)
 const ROOM_GRACE_PERIOD_MS = 5 * 60 * 1000;
@@ -63,6 +72,7 @@ function schedulePlayerRemoval(roomCode: string, playerId: string) {
       const player = game.getPlayer(playerId);
       if (player && !player.isConnected) {
         game.removePlayer(playerId);
+        playerToSocket.delete(playerId);
         io.to(roomCode).emit('player-left', playerId);
         console.log(`[Game] Player ${playerId} removed from ${roomCode} after disconnect grace period`);
 
@@ -132,6 +142,7 @@ io.on('connection', (socket: Socket<ClientToServerEvents, ServerToClientEvents>)
     socket.join(game.state.roomCode);
     socketRooms.set(socket.id, game.state.roomCode);
     socketPlayerIds.set(socket.id, playerId);
+    playerToSocket.set(playerId, socket.id);
 
     console.log(`[Game] Room ${game.state.roomCode} created by ${playerName}`);
     socket.emit('room-created', game.state.roomCode, playerId);
@@ -167,6 +178,7 @@ io.on('connection', (socket: Socket<ClientToServerEvents, ServerToClientEvents>)
     socket.join(roomCode);
     socketRooms.set(socket.id, roomCode);
     socketPlayerIds.set(socket.id, playerId);
+    playerToSocket.set(playerId, socket.id);
 
     console.log(`[Game] ${playerName} joined room ${roomCode}${isNewHost ? ' (new host)' : ''}`);
 
@@ -211,6 +223,7 @@ io.on('connection', (socket: Socket<ClientToServerEvents, ServerToClientEvents>)
     socket.join(roomCode);
     socketRooms.set(socket.id, roomCode);
     socketPlayerIds.set(socket.id, existingPlayerId);
+    playerToSocket.set(existingPlayerId, socket.id);
 
     console.log(`[Game] ${player.name} rejoined room ${roomCode}`);
 
@@ -246,7 +259,7 @@ io.on('connection', (socket: Socket<ClientToServerEvents, ServerToClientEvents>)
 
     // Send personalized state to each player (with their hand)
     for (const p of game.state.players) {
-      const playerSocket = io.sockets.sockets.get(p.id);
+      const playerSocket = getPlayerSocket(p.id);
       if (playerSocket) {
         playerSocket.emit('game-started', game.getPublicState(p.id));
       }
@@ -275,7 +288,7 @@ io.on('connection', (socket: Socket<ClientToServerEvents, ServerToClientEvents>)
     // If all submitted, send full state update to each player
     if (game.state.phase === 'judging') {
       for (const p of game.state.players) {
-        const playerSocket = io.sockets.sockets.get(p.id);
+        const playerSocket = getPlayerSocket(p.id);
         if (playerSocket) {
           // Send complete state with real submission playerIds for judging
           playerSocket.emit('judging-started', game.getPublicState(p.id));
@@ -340,7 +353,7 @@ io.on('connection', (socket: Socket<ClientToServerEvents, ServerToClientEvents>)
 
     // Send personalized state to each player
     for (const p of game.state.players) {
-      const playerSocket = io.sockets.sockets.get(p.id);
+      const playerSocket = getPlayerSocket(p.id);
       if (playerSocket) {
         playerSocket.emit('new-round', game.getPublicState(p.id));
       }
@@ -394,6 +407,7 @@ io.on('connection', (socket: Socket<ClientToServerEvents, ServerToClientEvents>)
         // During game, mark as disconnected and give grace period
         if (game.state.phase === 'lobby') {
           game.removePlayer(playerId);
+          playerToSocket.delete(playerId);
           socket.to(roomCode).emit('player-left', playerId);
 
           // If no players left, schedule deletion with grace period
