@@ -9,8 +9,6 @@ export const blackCards: BlackCard[] = [
   { id: 'b4', text: "Benni odia __ e __", pick: 2 },
   { id: 'b5', text: "Sei bravo a parole, ma con _____ come te la cavi?", pick: 1 },
   { id: 'b6', text: "Alberto 🥥 se non fosse _____ sarebbe ______", pick: 2 },
-  { id: 'b7', text: "Il miglior utente dmtso è quello che _____.", pick: 1 },
-  { id: 'b8', text: "Peffozza! _____!", pick: 1 },
   { id: 'b9', text: "Il peggior utente dmtso è quello che ___", pick: 1 },
   { id: 'b10', text: ".___ è il comando per ___", pick: 2 },
   { id: 'b11', text: "Twitch mi ha bannato per _____.", pick: 1 },
@@ -57,20 +55,14 @@ export const blackCards: BlackCard[] = [
 
   // Multiple pick cards
   { id: 'b46', text: "_____ + _____ = la combo definitiva.", pick: 2 },
-  { id: 'b47', text: "Dario: '_____ è mio padre.' Chat: 'No, _____ è mio padre!'", pick: 2 },
   { id: 'b48', text: "Prima dello sbusto c'era _____, dopo c'era _____.", pick: 2 },
   { id: 'b49', text: "Il mio spirito guida è _____, ma la mia debolezza è _____.", pick: 2 },
-  { id: 'b50', text: "Se _____ e _____ facessero una live insieme, esploderebbe internet.", pick: 2 },
 
   // More Dario Moccia specific
-  { id: 'b51', text: "La peffozza suprema include _____.", pick: 1 },
-  { id: 'b52', text: "Ho fatto follow a Dario per _____.", pick: 1 },
-  { id: 'b53', text: "Il momento migliore della live è stato quando _____.", pick: 1 },
   { id: 'b54', text: "La chat è impazzita quando Dario ha detto _____.", pick: 1 },
   { id: 'b55', text: "Il mio momento a pecora preferito è _____.", pick: 1 },
   { id: 'b56', text: "Se fossi uno streamer, la mia catchphrase sarebbe _____.", pick: 1 },
   { id: 'b57', text: "Ho donato 100 bit per dire _____.", pick: 1 },
-  { id: 'b58', text: "Il motivo per cui la live è in ritardo è _____.", pick: 1 },
   { id: 'b59', text: "Durante la maratona notturna, Dario ha confessato _____.", pick: 1 },
   { id: 'b60', text: "Il prossimo merchandise di Dario sarà _____.", pick: 1 },
   { id: 'b61', text: "La prossima Trilobox arc sarà su _____.", pick: 1 },
@@ -139,33 +131,25 @@ export const blackCards: BlackCard[] = [
 // Carte Bianche - Risposte
 export const whiteCards: WhiteCard[] = [
   // Dario Moccia / Streaming culture
-  { id: 'w1', text: "La Peffozza definitiva" },
   { id: 'w2', text: "Il meme morto che non muore mai" },
   { id: 'w3', text: "Mio padre, mia madre, mio nonno" },
-  { id: 'w4', text: "Andare a letto alle 4 di mattina" },
   { id: 'w5', text: "Si va a letto?" },
   { id: 'w6', text: "Il ban di Twitch ingiustificato" },
   { id: 'w7', text: "Dariong in Gear Fifth" },
   { id: 'w8', text: "Volpescu che grida MIO PADRE" },
   { id: 'w9', text: "La Perforza suprema" },
-  { id: 'w10', text: "Un'emote custom da 500 punti canale" },
-  { id: 'w11', text: "Lo streamer che legge la donazione sbagliata" },
 
   // Anime/Manga references
   { id: 'w12', text: "Rufy che diventa Gear Fifth" },
   { id: 'w13', text: "La sigla di apertura di One Piece" },
   { id: 'w14', text: "Il piano di Aizen" },
   { id: 'w15', text: "Zoro che si perde" },
-  { id: 'w16', text: "Goku che arriva in ritardo" },
-  { id: 'w17', text: "Un power-up dell'ultimo secondo" },
   { id: 'w18', text: "Il flashback durante la battaglia finale" },
   { id: 'w19', text: "La morte del personaggio preferito" },
-  { id: 'w20', text: "Il talk no jutsu di Naruto" },
   { id: 'w21', text: "L'urlo di Eren" },
   { id: 'w22', text: "Il terzo impatto" },
   { id: 'w23', text: "Un filler arc infinito" },
   { id: 'w24', text: "La waifu trash" },
-  { id: 'w25', text: "L'anime che non segue il manga" },
   { id: 'w26', text: "La pausa mensile di Hunter x Hunter" },
   { id: 'w27', text: "Uno Stand chiamato 'Despacito'" },
 
@@ -179,7 +163,6 @@ export const whiteCards: WhiteCard[] = [
   { id: 'w34', text: "L'aperitivo delle 18" },
   { id: 'w35', text: "La coda alle Poste italiane" },
   { id: 'w36', text: "Il ritardo di Trenitalia" },
-  { id: 'w37', text: "Il Wi-Fi italiano" },
   { id: 'w38', text: "I cantieri infiniti" },
   { id: 'w39', text: "La burocrazia italiana" },
   { id: 'w40', text: "Il motorino truccato" },
@@ -191,10 +174,7 @@ export const whiteCards: WhiteCard[] = [
   { id: 'w44', text: "La connessione a 300ms di ping" },
   { id: 'w45', text: "Il troll in ranked" },
   { id: 'w46', text: "Il noob che ruba il kill" },
-  { id: 'w47', text: "La patch che rompe tutto" },
   { id: 'w48', text: "Il DLC che costa più del gioco" },
-  { id: 'w49', text: "Il pay-to-win evidente" },
-  { id: 'w50', text: "Il rage quit epico" },
   { id: 'w51', text: "Controller lanciato contro il muro" },
   { id: 'w52', text: "La tastiera con i tasti WASD consumati" },
   { id: 'w53', text: "16 ore di grinding" },
@@ -205,27 +185,20 @@ export const whiteCards: WhiteCard[] = [
   // Internet culture
   { id: 'w57', text: "L'influencer che fa le scuse finte" },
   { id: 'w58', text: "Il commento del boomer su Facebook" },
-  { id: 'w59', text: "La notifica di LinkedIn" },
   { id: 'w60', text: "Il crypto bro in rovina" },
   { id: 'w61', text: "L'AI che genera immagini cursed" },
   { id: 'w62', text: "Lo screenshot del tweet cancellato" },
 
   // Twitch specific
   { id: 'w63', text: "L'hot tub streamer" },
-  { id: 'w64', text: "Il react content su content" },
   { id: 'w65', text: "Lo sponsor di raid shadow legends" },
   { id: 'w66', text: "Il DMCA strike improvviso" },
   { id: 'w67', text: "Lo streamer che dorme in live" },
-  { id: 'w68', text: "Le clip fuori contesto" },
-  { id: 'w69', text: "La mod della chat troppo severa" },
-  { id: 'w70', text: "Il troll che dona per insultare" },
 
   // Random/Absurd
-  { id: 'w71', text: "La pizza alle 3 di notte" },
+  { id: 'w71', text: "La pizza steam lore" },
   { id: 'w72', text: "Un'esistenza vuota e senza senso" },
   { id: 'w73', text: "Dormire 12 ore e svegliarsi più stanco" },
-  { id: 'w74', text: "Il frigo vuoto a mezzanotte" },
-  { id: 'w75', text: "Le notifiche silenziose che ignori" },
 
   // More Dario Moccia community
   { id: 'w76', text: "La reaction esagerata" },
@@ -233,8 +206,6 @@ export const whiteCards: WhiteCard[] = [
   { id: 'w78', text: "Il tier list controversa" },
   { id: 'w79', text: "La ship canon che nessuno voleva" },
   { id: 'w80', text: "Il manga che 'diventa bello dopo 200 capitoli'" },
-  { id: 'w81', text: "L'opening skippata (sacrilegio)" },
-  { id: 'w82', text: "Il power scaling impossibile" },
 
   // Pop culture Italy
   { id: 'w83', text: "Sanremo che dura 47 ore" },
@@ -242,7 +213,6 @@ export const whiteCards: WhiteCard[] = [
   { id: 'w85', text: "L'Isola dei Famosi" },
   { id: 'w86', text: "Uomini e Donne" },
   { id: 'w87', text: "Barbara D'Urso" },
-  { id: 'w88', text: "Il Festival di Sanremo" },
   { id: 'w89', text: "I Maneskin" },
   { id: 'w90', text: "La canzone tormentone estiva" },
   { id: 'w91', text: "Il trash italiano" },
@@ -263,24 +233,12 @@ export const whiteCards: WhiteCard[] = [
   { id: 'w104', text: "La RAM insufficiente" },
 
   // Cursed/Dark humor
-  { id: 'w105', text: "Il pensiero alle 3 di notte" },
-  { id: 'w106', text: "La sveglia dopo 4 ore di sonno" },
-  { id: 'w107', text: "Il lunedì mattina" },
-  { id: 'w108', text: "L'email del capo nel weekend" },
-  { id: 'w109', text: "Lo stage non pagato" },
-  { id: 'w110', text: "Il colloquio andato male" },
-  { id: 'w111', text: "L'affitto a Milano" },
-  { id: 'w112', text: "Le bollette del gas" },
-
-  // More anime
   { id: 'w113', text: "Jojo reference in qualsiasi contesto" },
   { id: 'w114', text: "Il protagonista con i capelli colorati" },
   { id: 'w115', text: "L'harem anime" },
-  { id: 'w116', text: "Il beach episode" },
   { id: 'w117', text: "Il festival scolastico" },
   { id: 'w118', text: "La confessione sotto il ciliegio" },
   { id: 'w119', text: "Il tsundere che dice 'B-Baka!'" },
-  { id: 'w120', text: "Il personaggio che mangia tanto ma resta magro" },
   { id: 'w121', text: "L'amico d'infanzia friendzonato" },
   { id: 'w122', text: "Il villain con un passato triste" },
 
