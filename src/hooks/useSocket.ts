@@ -24,6 +24,39 @@ function getSocketUrl() {
   return `http://${host}:3001`;
 }
 
+// LocalStorage keys for session persistence
+const STORAGE_KEY_PLAYER_ID = 'cah_player_id';
+const STORAGE_KEY_ROOM_CODE = 'cah_room_code';
+
+// Helper to safely access localStorage
+function getStoredValue(key: string): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function setStoredValue(key: string, value: string): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+function clearStoredSession(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.removeItem(STORAGE_KEY_PLAYER_ID);
+    localStorage.removeItem(STORAGE_KEY_ROOM_CODE);
+  } catch {
+    // Ignore storage errors
+  }
+}
+
 export function useSocket() {
   const [socket, setSocket] = useState<Socket<
     ServerToClientEvents,
@@ -36,15 +69,38 @@ export function useSocket() {
   const [error, setError] = useState<string | null>(null);
   const [submittedPlayers, setSubmittedPlayers] = useState<Set<string>>(new Set());
 
+  // Track if we're attempting a rejoin
+  const rejoinAttemptedRef = useRef(false);
+  const storedPlayerIdRef = useRef<string | null>(null);
+  const storedRoomCodeRef = useRef<string | null>(null);
+
   // Connect to socket server
   useEffect(() => {
+    // Load stored session data
+    storedPlayerIdRef.current = getStoredValue(STORAGE_KEY_PLAYER_ID);
+    storedRoomCodeRef.current = getStoredValue(STORAGE_KEY_ROOM_CODE);
+
     const newSocket = io(getSocketUrl(), {
       autoConnect: true,
+      reconnection: true,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
     });
 
     newSocket.on('connect', () => {
       setIsConnected(true);
       setError(null);
+
+      // Attempt to rejoin if we have stored session data and haven't attempted yet
+      if (
+        storedPlayerIdRef.current &&
+        storedRoomCodeRef.current &&
+        !rejoinAttemptedRef.current
+      ) {
+        rejoinAttemptedRef.current = true;
+        newSocket.emit('rejoin-room', storedRoomCodeRef.current, storedPlayerIdRef.current);
+      }
     });
 
     newSocket.on('disconnect', () => {
@@ -54,11 +110,26 @@ export function useSocket() {
     newSocket.on('error', (message: string) => {
       setError(message);
       setTimeout(() => setError(null), 5000);
+      // Clear stored session on critical errors
+      if (
+        message.includes('non trovata') ||
+        message.includes('not found') ||
+        message.includes('Player not found')
+      ) {
+        clearStoredSession();
+        storedPlayerIdRef.current = null;
+        storedRoomCodeRef.current = null;
+      }
     });
 
     newSocket.on('room-created', (code: string, id: string) => {
       setRoomCode(code);
       setPlayerId(id);
+      // Store session for reconnection
+      setStoredValue(STORAGE_KEY_PLAYER_ID, id);
+      setStoredValue(STORAGE_KEY_ROOM_CODE, code);
+      storedPlayerIdRef.current = id;
+      storedRoomCodeRef.current = code;
     });
 
     newSocket.on('room-joined', (id: string, state: GameState) => {
@@ -66,6 +137,11 @@ export function useSocket() {
       setRoomCode(state.roomCode);
       setGameState(state);
       setSubmittedPlayers(new Set());
+      // Store session for reconnection
+      setStoredValue(STORAGE_KEY_PLAYER_ID, id);
+      setStoredValue(STORAGE_KEY_ROOM_CODE, state.roomCode);
+      storedPlayerIdRef.current = id;
+      storedRoomCodeRef.current = state.roomCode;
     });
 
     newSocket.on('player-joined', (player: Player) => {
@@ -90,6 +166,30 @@ export function useSocket() {
         const next = new Set(prev);
         next.delete(leftPlayerId);
         return next;
+      });
+    });
+
+    newSocket.on('player-disconnected', (disconnectedPlayerId: string) => {
+      setGameState((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          players: prev.players.map((p) =>
+            p.id === disconnectedPlayerId ? { ...p, isConnected: false } : p
+          ),
+        };
+      });
+    });
+
+    newSocket.on('player-reconnected', (reconnectedPlayerId: string) => {
+      setGameState((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          players: prev.players.map((p) =>
+            p.id === reconnectedPlayerId ? { ...p, isConnected: true } : p
+          ),
+        };
       });
     });
 
@@ -175,7 +275,26 @@ export function useSocket() {
 
     setSocket(newSocket);
 
+    // Handle visibility change (iOS Safari backgrounding)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // Page became visible - check if socket is still connected
+        if (!newSocket.connected) {
+          newSocket.connect();
+        }
+        // Re-attempt rejoin if we have stored credentials but no current game state
+        const storedId = storedPlayerIdRef.current || getStoredValue(STORAGE_KEY_PLAYER_ID);
+        const storedCode = storedRoomCodeRef.current || getStoredValue(STORAGE_KEY_ROOM_CODE);
+        if (storedId && storedCode && newSocket.connected) {
+          newSocket.emit('rejoin-room', storedCode, storedId);
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
     return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       newSocket.close();
     };
   }, []);
@@ -224,6 +343,18 @@ export function useSocket() {
     [socket]
   );
 
+  // Clear session and leave room
+  const leaveRoom = useCallback(() => {
+    clearStoredSession();
+    storedPlayerIdRef.current = null;
+    storedRoomCodeRef.current = null;
+    rejoinAttemptedRef.current = false;
+    setGameState(null);
+    setPlayerId(null);
+    setRoomCode(null);
+    setSubmittedPlayers(new Set());
+  }, []);
+
   // Computed values
   const currentPlayer = gameState?.players.find((p) => p.id === playerId);
   const isHost = currentPlayer?.isHost ?? false;
@@ -252,5 +383,6 @@ export function useSocket() {
     pickWinner,
     nextRound,
     addCustomCard,
+    leaveRoom,
   };
 }

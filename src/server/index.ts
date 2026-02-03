@@ -48,6 +48,47 @@ const socketPlayerIds = new Map<string, string>();
 const ROOM_GRACE_PERIOD_MS = 5 * 60 * 1000;
 const roomDeletionTimers = new Map<string, NodeJS.Timeout>();
 
+// Grace period before removing disconnected players (2 minutes)
+const PLAYER_DISCONNECT_GRACE_MS = 2 * 60 * 1000;
+const playerDisconnectTimers = new Map<string, NodeJS.Timeout>();
+
+function schedulePlayerRemoval(roomCode: string, playerId: string) {
+  const key = `${roomCode}:${playerId}`;
+  // Clear any existing timer
+  cancelPlayerRemoval(roomCode, playerId);
+
+  const timer = setTimeout(() => {
+    const game = getGame(roomCode);
+    if (game) {
+      const player = game.getPlayer(playerId);
+      if (player && !player.isConnected) {
+        game.removePlayer(playerId);
+        io.to(roomCode).emit('player-left', playerId);
+        console.log(`[Game] Player ${playerId} removed from ${roomCode} after disconnect grace period`);
+
+        // If no players left, schedule room deletion
+        if (game.state.players.length === 0) {
+          scheduleRoomDeletion(roomCode);
+        }
+      }
+    }
+    playerDisconnectTimers.delete(key);
+  }, PLAYER_DISCONNECT_GRACE_MS);
+
+  playerDisconnectTimers.set(key, timer);
+  console.log(`[Game] Player ${playerId} in ${roomCode} scheduled for removal in 2 minutes`);
+}
+
+function cancelPlayerRemoval(roomCode: string, playerId: string) {
+  const key = `${roomCode}:${playerId}`;
+  const timer = playerDisconnectTimers.get(key);
+  if (timer) {
+    clearTimeout(timer);
+    playerDisconnectTimers.delete(key);
+    console.log(`[Game] Player ${playerId} removal from ${roomCode} cancelled`);
+  }
+}
+
 function scheduleRoomDeletion(roomCode: string) {
   // Clear any existing timer
   cancelRoomDeletion(roomCode);
@@ -134,6 +175,50 @@ io.on('connection', (socket: Socket<ClientToServerEvents, ServerToClientEvents>)
 
     // Notify other players
     socket.to(roomCode).emit('player-joined', player);
+  });
+
+  // Rejoin an existing room (reconnection after disconnect)
+  socket.on('rejoin-room', (roomCode: string, existingPlayerId: string) => {
+    const game = getGame(roomCode);
+    if (!game) {
+      socket.emit('error', 'Stanza non trovata');
+      return;
+    }
+
+    const player = game.getPlayer(existingPlayerId);
+    if (!player) {
+      socket.emit('error', 'Player not found in room');
+      return;
+    }
+
+    // Cancel any pending removal
+    cancelPlayerRemoval(roomCode, existingPlayerId);
+    cancelRoomDeletion(roomCode);
+
+    // Update socket mappings to new socket ID
+    // First, clean up old socket mappings if they exist
+    for (const [oldSocketId, mappedRoomCode] of socketRooms.entries()) {
+      if (socketPlayerIds.get(oldSocketId) === existingPlayerId && mappedRoomCode === roomCode) {
+        socketRooms.delete(oldSocketId);
+        socketPlayerIds.delete(oldSocketId);
+      }
+    }
+
+    // Reconnect player
+    game.reconnectPlayer(existingPlayerId);
+
+    // Update mappings
+    socket.join(roomCode);
+    socketRooms.set(socket.id, roomCode);
+    socketPlayerIds.set(socket.id, existingPlayerId);
+
+    console.log(`[Game] ${player.name} rejoined room ${roomCode}`);
+
+    // Send current state to reconnected player
+    socket.emit('room-joined', existingPlayerId, game.getPublicState(existingPlayerId));
+
+    // Notify other players
+    socket.to(roomCode).emit('player-reconnected', existingPlayerId);
   });
 
   // Start the game
@@ -303,12 +388,25 @@ io.on('connection', (socket: Socket<ClientToServerEvents, ServerToClientEvents>)
     if (roomCode && playerId) {
       const game = getGame(roomCode);
       if (game) {
-        game.removePlayer(playerId);
-        socket.to(roomCode).emit('player-left', playerId);
+        const player = game.getPlayer(playerId);
 
-        // If no players left, schedule deletion with grace period
-        if (game.state.players.length === 0) {
-          scheduleRoomDeletion(roomCode);
+        // In lobby, remove immediately (they can just rejoin with name)
+        // During game, mark as disconnected and give grace period
+        if (game.state.phase === 'lobby') {
+          game.removePlayer(playerId);
+          socket.to(roomCode).emit('player-left', playerId);
+
+          // If no players left, schedule deletion with grace period
+          if (game.state.players.length === 0) {
+            scheduleRoomDeletion(roomCode);
+          }
+        } else {
+          // Mark player as disconnected but don't remove yet
+          game.disconnectPlayer(playerId);
+          socket.to(roomCode).emit('player-disconnected', playerId);
+
+          // Schedule removal after grace period
+          schedulePlayerRemoval(roomCode, playerId);
         }
       }
 

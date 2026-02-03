@@ -54,6 +54,7 @@ export interface GameState {
 export interface ClientToServerEvents {
   'create-room': (playerName: string) => void;
   'join-room': (roomCode: string, playerName: string) => void;
+  'rejoin-room': (roomCode: string, playerId: string) => void;
   'start-game': () => void;
   'submit-cards': (cardIds: string[]) => void;
   'pick-winner': (playerId: string) => void;
@@ -67,6 +68,8 @@ export interface ServerToClientEvents {
   'room-joined': (playerId: string, state: GameState) => void;
   'player-joined': (player: Player) => void;
   'player-left': (playerId: string) => void;
+  'player-disconnected': (playerId: string) => void;
+  'player-reconnected': (playerId: string) => void;
   'game-started': (state: GameState) => void;
   'new-round': (state: GameState) => void;
   'card-submitted': (playerId: string) => void;
